@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider          = "postgresql"
+    url               = env("DATABASE_URL")
+    relationMode      = "prisma"
+}
+
+model Job {
+    id          Int          @id @default(autoincrement())
+    title       String
+    fromSalary  Int?
+    toSalary    Int?
+    location    Location
+    remoteType  RemoteType
+    currency    Currency
+    jobType     JobType
+    applyLink   String
+    description String
+    slug        String       @unique
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    TagsOnJobs  TagsOnJobs[]
+    companyName String
+    logo        String?
+
+    @@map("job")
+}
+
+enum RemoteType {
+    Full
+    Hybrid
+    None
+}
+
+enum Location {
+    Europe
+    Australia
+    NorthAmerica
+    SouthAmerica
+    Africa
+    Asia
+    MiddleEast
+    Worldwide
+}
+
+enum Currency {
+    Usd
+    Eur
+    Pound
+}
+
+enum JobType {
+    Engineering
+    Marketing
+    Design
+    Support
+    DevOps
+    Other
+}
+
+model Tag {
+    id         Int          @id @default(autoincrement())
+    name       String       @unique
+    TagsOnJobs TagsOnJobs[]
+
+    @@map("tag")
+}
+
+model TagsOnJobs {
+    job   Job @relation(fields: [jobId], references: [id])
+    jobId Int
+    tag   Tag @relation(fields: [tagId], references: [id])
+    tagId Int
+
+    @@id([jobId, tagId])
+    @@map("job_tags")
+}
