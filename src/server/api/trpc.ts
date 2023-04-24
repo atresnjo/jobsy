@@ -16,8 +16,14 @@
  * processing a request
  *
  */
-import * as trpcNext from "@trpc/server/adapters/next"
-import { prisma } from "../db"
+import * as trpcNext from "@trpc/server/adapters/next";
+import { getAuth, clerkClient } from "@clerk/nextjs/server";
+
+import { prisma } from "../db";
+
+type ContextType = {
+  user: User | null
+}
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use
  * it, you can export it from here
@@ -28,15 +34,9 @@ import { prisma } from "../db"
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// eslint-disable-next-line @typescript-eslint/require-await
-export const createContextInner = async (opts: trpcNext.CreateNextContextOptions) => {
-  return {
-    prisma,
-    req: opts.req,
-    res: opts.res
-  }
-}
+export const createContextInner = async ({ user }: ContextType) => {
+  return { user, prisma };
+};
 
 /**
  * This is the actual context you'll use in your router. It will be used to
@@ -47,9 +47,17 @@ export const createContextInner = async (opts: trpcNext.CreateNextContextOptions
 export const createTRPCContext = async (
   opts: trpcNext.CreateNextContextOptions
 ) => {
+  async function getUser() {
+    // get userId from request
+    const { userId } = getAuth(opts.req);
+    // get full user object
+    const user = userId ? await clerkClient.users.getUser(userId) : null;
+    return user;
+  }
 
-  return await createContextInner(opts)
-}
+  const user = await getUser();
+  return await createContextInner({ user });
+};
 
 /**
  * 2. INITIALIZATION
@@ -57,15 +65,16 @@ export const createTRPCContext = async (
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-import { initTRPC } from "@trpc/server"
-import superjson from "superjson"
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
+import { User } from "@clerk/nextjs/dist/api";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape }) {
-    return shape
+    return shape;
   },
-})
+});
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -78,7 +87,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  * This is how you create new routers and subrouters in your tRPC API
  * @see https://trpc.io/docs/router
  */
-export const createTRPCRouter = t.router
+export const createTRPCRouter = t.router;
 
 /**
  * Public (unauthed) procedure
@@ -87,13 +96,19 @@ export const createTRPCRouter = t.router
  * tRPC API. It does not guarantee that a user querying is authorized, but you
  * can still access user session data if they are logged in
  */
-export const publicProcedure = t.procedure
+export const publicProcedure = t.procedure;
 
-/**
- * Reusable middleware that enforces users are logged in before running the
- * procedure
- */
+const isAuthed = t.middleware(({ next, ctx }) => {
+  if (!ctx.user) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
 
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+});
 /**
  * Protected (authed) procedure
  *
@@ -105,4 +120,5 @@ export const publicProcedure = t.procedure
  */
 // export type Context = trpc.inferAsyncReturnType<typeof createTRPCContext>;
 
-export const router = t.router
+export const router = t.router;
+export const protectedProcedure = t.procedure.use(isAuthed);

@@ -18,7 +18,7 @@ export const jobRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const limit = 5
-      let cursor = input.cursor
+      const cursor = input.cursor
 
       const jobs = await ctx.prisma.job.findMany({
         take: limit,
