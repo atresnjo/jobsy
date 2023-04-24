@@ -26,7 +26,7 @@ Welcome to my Next.js job board example! This project showcases the use of infin
 
 ## 🗺️ Roadmap
 
-- [ ] 🔒 Add user authentication
+- [x] 🔒 Add user authentication
 - [ ] 💾 Implement functionality to allow users to save job postings
 - [ ] 📝 Create a job details page to display information about a particular job, including job description and other relevant details
 - [ ] 🏢 Create a page to display a list of companies that have posted jobs

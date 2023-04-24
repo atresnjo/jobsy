@@ -5,6 +5,8 @@ import "../styles/globals.css"
 import { ThemeProvider } from "next-themes"
 import { ReactNode } from "react"
 import { NextPage } from "next"
+import { ClerkProvider } from "@clerk/nextjs"
+import { Toaster } from "react-hot-toast"
 
 type Page<P = {}> = NextPage<P> & {
   getLayout?: (page: ReactNode) => ReactNode
@@ -33,9 +35,12 @@ const MyApp: AppType = ({
 					--font-sans: ${fontSans.style.fontFamily};
 				}
 			}`}</style>
-      <ThemeProvider attribute="class" defaultTheme="light">
-        {getLayout(<Component {...pageProps} />)}
-      </ThemeProvider>
+      <ClerkProvider {...pageProps}>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <Toaster />
+          {getLayout(<Component {...pageProps} />)}
+        </ThemeProvider>
+      </ClerkProvider>
     </>
   )
 }
