@@ -24,8 +24,7 @@ type PageProps = {
 }
 
 export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
-  const jobs = await prisma.job.findMany({ take: 5 })
-
+  const jobs = await prisma.job.findMany({ take: 5, cursor: { id: 0 } })
   return {
     props: {
       jobs,
@@ -37,7 +36,6 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
 const JobsPage = (props: PageProps) => {
   const [searchTerm, setSearchTerm] = useState<string | undefined>()
   const [cachedSearchTerm, setCachedSearchTerm] = useState<string | undefined>()
-
   const [jobType, setJobType] = useState<JobType | undefined>()
   const [remoteType, setRemoteType] = useState<RemoteType | undefined>()
   const { inView, ref } = useInView()
@@ -264,7 +262,7 @@ const JobsPage = (props: PageProps) => {
                 </div>
               )
             })}
-          {!hasNextPage && jobs?.pages[0]?.jobs.length === 0 ? (
+          {!hasNextPage && jobs?.pages[0]?.jobs.length === 0 && initialJobs.length === 0 ? (
             <h1 className="text-center text-lg text-destructive">
               Sorry, no jobs found. 😞
             </h1>

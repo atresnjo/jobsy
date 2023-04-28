@@ -25,6 +25,7 @@ const SignUpPage = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
@@ -65,11 +66,24 @@ const SignUpPage = () => {
         redirectUrl: "http://localhost:3000/jobs"
       })
 
+      await setActive!({ session: null })
+      reset();
+
     } catch (error) {
     }
   }
-  return (
-    <div className="flex h-screen container">
+
+
+  const renderView = () => {
+    if (signUp?.status == 'missing_requirements') {
+      return (
+        <div className="m-auto w-full max-w-md">
+          <h1 className="text-2xl">Please check your E-Mail! 🚀</h1>
+        </div>
+      )
+    }
+
+    return (
       <form className="m-auto max-w-md w-full" onSubmit={handleSubmit(onSubmit)}>
         <label className="mb-5 block">
           <Input
@@ -106,6 +120,11 @@ const SignUpPage = () => {
           Create Account
         </Button>
       </form>
+    )
+  }
+  return (
+    <div className="flex h-screen container">
+      {renderView()}
     </div>
   )
 }

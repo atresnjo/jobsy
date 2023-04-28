@@ -6,6 +6,7 @@ export const jobRouter = createTRPCRouter({
   getTotalJobCount: publicProcedure.query(async ({ ctx }) => {
     return await ctx.prisma.job.count()
   }),
+  
   getInfiniteJobs: publicProcedure
     .input(
       z.object({
