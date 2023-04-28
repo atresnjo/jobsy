@@ -2,15 +2,65 @@ import { Job } from "@prisma/client"
 import { formatSalary } from "../lib/formatNumbers"
 import relativeTime from "dayjs/plugin/relativeTime"
 import dayjs from "dayjs"
+import { api } from "@/utils/api"
+import toast from "react-hot-toast"
 dayjs.extend(relativeTime)
 
 type Props = {
   job: Job
+  isLiked?: true
+  onLikeUpdate?(): void
 }
 
 const JobCard = (props: Props) => {
+  const likeJobMutation = api.userRouter.likeJob.useMutation()
+  const unlikeJobMutation = api.userRouter.unlikeJob.useMutation()
+
+  const updateLikeStatus = async () => {  
+    if (!props.isLiked) {
+      await toast.promise(
+        likeJobMutation.mutateAsync({ jobId: props.job.id }),
+        {
+          loading: "Liking job...",
+          success: "Successfully liked job",
+          error: "There was an error liking the job",
+        },
+        {
+          success: {
+            duration: 1000,
+            icon: '💗',
+          },
+        }
+      )
+    }
+    else {
+      await toast.promise(
+        unlikeJobMutation.mutateAsync({ jobId: props.job.id }),
+        {
+          loading: "Unliking job...",
+          success: "Successfully unliked job",
+          error: "There was an error unliking the job",
+        },
+        {
+          success: {
+            duration: 1000,
+            icon: '💗',
+          },
+        }
+      )
+    }
+
+    if (props.onLikeUpdate)
+      props.onLikeUpdate()
+  }
+
   return (
-    <div className="group flex transform cursor-pointer border-2 border-black bg-background p-3 shadow-button transition duration-500 hover:bg-[#F6EEE9] sm:p-2">
+    <div className="group flex  transform cursor-pointer border-2 border-black bg-background p-3 shadow-button transition duration-500 hover:bg-[#F6EEE9] sm:p-2">
+      <div className="absolute flex -top-4 right-1/2 text-2xl ">        
+        <button onClick={updateLikeStatus}>
+          <span className="hidden group-hover:flex animate-bounce duration-1000">💗</span>
+        </button>
+      </div>
       <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
         <img
           className="aspect-square h-full w-full"
@@ -87,7 +137,7 @@ const JobCard = (props: Props) => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
 

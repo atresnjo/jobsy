@@ -5,13 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "postinstall": "prisma generate",
-    "lint": "source $HOME/.nvm/nvm.sh; nvm use; next lint",
-    "start": "source $HOME/.nvm/nvm.sh; nvm use; next start",
-    "db-seed": "NODE_ENV=development prisma db seed"
-  },
-  "prisma": {
-    "seed": "ts-node ./prisma/seed.mjs"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.16.4",

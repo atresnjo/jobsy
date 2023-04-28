@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Fingerprint, Key, LogOut, User } from "lucide-react"
 import { useRouter } from "next/router"
+import { DashIcon, DashboardIcon } from "@radix-ui/react-icons"
 
 const Navbar = () => {
   const clerkAuth = useAuth();
@@ -35,6 +36,10 @@ const Navbar = () => {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-gray-200" />
             <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <DashboardIcon className="mr-2 h-4 w-4" />
+                <Link href={"/dashboard"}>Dashboard</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
                 <Link href={"/dashboard/profile"}>Profile</Link>

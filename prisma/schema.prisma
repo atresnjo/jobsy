@@ -6,9 +6,8 @@ generator client {
 }
 
 datasource db {
-    provider          = "postgresql"
-    url               = env("DATABASE_URL")
-    relationMode      = "prisma"
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model Job {
@@ -28,8 +27,45 @@ model Job {
     TagsOnJobs  TagsOnJobs[]
     companyName String
     logo        String?
+    likedBy     LikedJobs[]
 
     @@map("job")
+}
+
+model User {
+    id                   Int         @id @default(autoincrement())
+    likedJobs            LikedJobs[]
+    external_provider_id String
+
+    @@map("user")
+}
+
+model LikedJobs {
+    job    Job  @relation(fields: [jobId], references: [id])
+    jobId  Int
+    user   User @relation(fields: [userId], references: [id])
+    userId Int
+
+    @@id([jobId, userId])
+    @@map("liked_jobs")
+}
+
+model Tag {
+    id         Int          @id @default(autoincrement())
+    name       String       @unique
+    TagsOnJobs TagsOnJobs[]
+
+    @@map("tag")
+}
+
+model TagsOnJobs {
+    job   Job @relation(fields: [jobId], references: [id])
+    jobId Int
+    tag   Tag @relation(fields: [tagId], references: [id])
+    tagId Int
+
+    @@id([jobId, tagId])
+    @@map("job_tags")
 }
 
 enum RemoteType {
@@ -62,22 +98,4 @@ enum JobType {
     Support
     DevOps
     Other
-}
-
-model Tag {
-    id         Int          @id @default(autoincrement())
-    name       String       @unique
-    TagsOnJobs TagsOnJobs[]
-
-    @@map("tag")
-}
-
-model TagsOnJobs {
-    job   Job @relation(fields: [jobId], references: [id])
-    jobId Int
-    tag   Tag @relation(fields: [tagId], references: [id])
-    tagId Int
-
-    @@id([jobId, tagId])
-    @@map("job_tags")
 }
